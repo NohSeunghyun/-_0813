@@ -1,0 +1,107 @@
+예)그룹별 최소급여, 최대급여 구하기
+--방법1.keep함수사용
+select dno, ename, salary,
+min(salary) keep(dense_rank first order by salary) over(partition by dno) as "최소 급여",
+max(salary) keep(dense_rank last order by salary) over(partition by dno) as "최대 급여"
+from employee;
+--이 쿼리문은 최소급여, 최대급여 1명씩 각 부서당 2명씩 나오는게 아닌 각 부서에 소속된 모든 사원이 출력되고 최소,최대급여 컬럼에 각 부서의 최소,최대급여가 들어간다.
+
+--문제에 의거한 딱 그룹별 최소급여,최대급여만 구하고자 한다면 아래 쿼리문
+select distinct dno,
+min(salary) keep(dense_rank first order by salary) over(partition by dno) as "최소 급여",
+max(salary) keep(dense_rank last order by salary) over(partition by dno) as "최대 급여"
+from employee
+order by dno;
+
+--★위 예제 심화) 각 부서에 최소급여,최대급여에 해당하는 사원만 출력해보기 = 각 부서당 최소급여,최대급여를 가진 단 두명씩만 출력하기
+--방법1-1.그룹함수 사용 후 서브쿼리 사용 후 union all 사용
+--[1]각 부서별 최소급여
+select dno, min(salary)
+from employee
+group by dno
+order by dno;
+
+--[2]각 부서별 최대급여
+select dno, max(salary)
+from employee
+group by dno
+order by dno;
+
+--[3]최소급여와 구하고자 하는 정보출력을 위해 서브쿼리 결합
+select dno, ename, salary
+from employee
+where (dno, salary) in (select dno, min(salary)
+		    from employee
+		    group by dno)
+order by dno;
+
+--[4]최대급여와 구하고자 하는 정보 출력을 위해 서브쿼리 결합
+select dno, ename, salary
+from employee
+where (dno, salary) in (select dno, max(salary)
+		    from employee
+		    group by dno)
+order by dno;
+
+--[5]위 결과를 바탕으로 union all로 합치기
+select dno, ename, salary
+from employee
+where (dno, salary) in (select dno, min(salary)
+		    from employee
+		    group by dno)
+union all
+select dno, ename, salary
+from employee
+where (dno, salary) in (select dno, max(salary)
+		    from employee
+		    group by dno)
+order by dno, salary desc; --dno 오름차순 후 salary 내림차순
+
+--방법1-2.keep함수 사용 후 서브쿼리 사용 후 union all 사용
+--[1]각 부서별 최소급여
+select distinct dno,
+min(salary) keep(dense_rank first order by salary) over(partition by dno) as "최소 급여"
+from employee
+order by dno;
+
+--[2]각 부서별 최대급여
+select distinct dno,
+max(salary) keep(dense_rank last order by salary) over(partition by dno) as "최대 급여"
+from employee
+order by dno;
+
+--[3]최소급여을 구하고자 하는 정보출력을 위해 서브쿼리 결합
+select dno, ename, salary, 
+min(salary) keep(dense_rank first order by salary) over(partition by dno) as "최소 급여"
+from employee
+where (dno, salary) in (select distinct dno, min(salary) keep(dense_rank first order by salary) over(partition by dno)
+		    from employee);
+
+--[4]최대급여을 구하고자 하는 정보 출력을 위해 서브쿼리 결합
+select dno, ename, salary, 
+max(salary) keep(dense_rank last order by salary) over(partition by dno) as "최대 급여"
+from employee
+where (dno, salary) in (select distinct dno, max(salary) keep(dense_rank last order by salary) over(partition by dno)
+		    from employee);
+				 		
+--[5]위 결과를 바탕으로 union all로 합치기
+select dno, ename, salary, 
+min(salary) keep(dense_rank first order by salary) over(partition by dno) as "부서의 최소/최대 급여"
+from employee
+where (dno, salary) in (select distinct dno, min(salary) keep(dense_rank first order by salary) over(partition by dno)
+		    from employee)
+union all
+select dno, ename, salary, 
+max(salary) keep(dense_rank last order by salary) over(partition by dno) as "부서의 최소/최대 급여"
+from employee
+where (dno, salary) in (select distinct dno, max(salary) keep(dense_rank last order by salary) over(partition by dno)
+		    from employee)
+order by dno, salary; --dno 오름차순 후 salary는 별칭에 맞게 최소값 먼저 나오게 하기위해 오름차순
+
+--방법2.잘못된 것
+select dno, ename, salary,
+min(salary) as "최소 급여",
+max(salary) as "최대 급여"
+from employee
+group by dno, ename, salary
+order by 1;--그룹별 최소급여, 최대급여가 아닌 각 사원의 최소급여, 최대급여를 구하게되어 최소급여, 최대급여가 자기 급여임

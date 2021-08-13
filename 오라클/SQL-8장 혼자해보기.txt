@@ -1,0 +1,126 @@
+/************************
+ ****8장-혼자해보기****
+ ************************/
+
+--1. 다음 표에 명시된대로 dept 테이블을 생성하시오.
+--컬럼명  데이터타입       크기
+--dno    number     2
+--dname  varchar2  14 
+--loc    varchar2  13
+
+create table dept(
+dno number(2),
+dname varchar2(14),
+loc varchar2(13)
+);
+
+--확인
+select *
+from dept;
+
+--2. 다음 표에 명시된대로 emp 테이블을 생성하시오.
+--컬럼명  데이터타입       크기
+--eno    number     4
+--ename  varchar2  10 
+--dno    number     2
+
+create table emp(
+eno number(4),
+ename varchar2(10),
+dno number(2)
+);
+
+--확인
+select *
+from emp;
+
+--3. 긴 이름을 저장할 수 있도록 emp테이블을 수정하시오. (ename 컬럼의 크기)
+--컬럼명  데이터타입       크기
+--eno    number     4
+--ename  varchar2  25(크기가 수정된 부분) 
+--dno    number     2
+
+alter table emp
+modify ename varchar2(25);
+
+--확인-run SQL에서 실행
+desc emp;
+
+--4. employee 테이블을 복사해서 employee2란 이름의 테이블을 생성하되
+--사원번호, 이름, 급여, 부서 번호 컬럼만 복사하고 새로 생성된 테이블의 컬럼명은
+--각각 emp_id, name, sal, dept_id 로 지정하시오
+
+--방법1.
+create table employee2(emp_id, name, sal, dept_id)
+as
+select eno, ename, salary, dno
+from employee;
+
+--방법2.
+--[1]
+create table employee2
+as
+select eno, ename, salary, dno
+from employee;
+
+--[2]
+alter table employee2
+rename column eno to emp_id;
+
+alter table employee2
+rename column ename to name;
+
+alter table employee2
+rename column salary to sal;
+
+alter table employee2
+rename column dno to dept_id;
+
+--확인
+select *
+from employee2;
+
+--5.emp테이블을 삭제하시오
+
+drop table emp;
+
+--6.employee2 란 이름을 emp로 변경하시오
+
+rename employee2 to emp;
+
+--확인
+select *
+from emp;
+
+--7.dept 테이블에서 dname 컬럼제거하시오
+
+alter table dept
+drop column dname;
+
+--확인
+select *
+from dept;
+
+--8.dept 테이블에서 loc컬럼을 unused로 표시하시오
+
+alter table dept
+set unused(loc);
+
+--확인--run sql에도 안나옴.
+select *
+from dept;
+
+--9.unused 컬럼을 모두 제거하시오.
+
+alter table *
+drop unused columns;
+
+--확인--run sql에도 안나옴.
+select*
+from dept;
+
+--원상복구
+drop table dept;
+drop table emp;
+
+/*************************************************************************************************************************************/

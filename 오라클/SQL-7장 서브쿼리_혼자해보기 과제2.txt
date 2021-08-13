@@ -1,0 +1,157 @@
+--문제12.부서위치가 DALLAS인 사원 이름과 부서번호 및 담당업무 표시
+--equi join
+select ename, e.dno, job --dno는 사원,부서테이블 둘다 존재하기에 앞에 별칭을 붙여 어디테이블에서 갖다쓸지 적어야함
+from employee e, department d
+where d.dno=e.dno --조인조건
+and loc='DALLAS'; --검색조건
+
+--natural join --더 쓰기 편함. 다른조인 적기 힘들어 생략
+select ename, dno, job
+from employee natural join department
+where loc='DALLAS'; --검색조건. natural join은 조인조건x 자연스럽게 조인
+
+--서브쿼리
+--[1]부서위치가 DALLAS인 부서번호구하기
+select dno
+from department
+where loc='DALLAS';
+
+--[2]서브쿼리 결합
+select ename, dno, job
+from employee
+where dno in (select dno
+	      from department
+	      where loc='DALLAS');
+
+--추가문제12. 부서위치가 DALLAS인 사원이름, 부서번호, 담당업무, 부서위치 표시
+--natural join
+select ename, dno, job, loc
+from employee natural join department
+where loc='DALLAS';
+
+--서브쿼리
+--[1]부서위치가 DALLAS인 부서번호 구하기
+select dno
+from department
+where loc='DALLAS';
+
+--[2]서브쿼리+조인
+select ename, dno, job, loc
+from employee natural join department
+where dno in (select dno
+	      from department
+	      where loc='DALLAS');			  	
+
+--문제13.KING에게 보고하는 사원이름과 급여표시
+--[1]king의 사원번호 출력
+select eno
+from employee
+where ename='KING';
+
+--[2]서브쿼리 결합
+select ename, salary
+from employee
+where manager = (select eno
+		from employee
+		where ename='KING');
+				 
+--문제14.RESEARCH 부서의 사원에 대한 부서번호, 사원이름, 담당업무 표시
+--equi join
+select e.dno, ename, job
+from employee e, department d
+where e.dno=d.dno --조인조건
+and dname='RESEARCH'; --검색조건
+
+--natural join --더 쓰기 편함. 다른조인 적기 힘들어 생략
+select dno, ename, job
+from employee natural join department
+where dname='RESEARCH'; --검색조건. natural join은 조인조건x 자연스럽게 조인
+
+--서브쿼리
+--[1]RESEARCH 부서번호 구하기
+select dno
+from department
+where dname='RESEARCH';
+
+--[2]서브쿼리 결합
+select dno, ename, job
+from employee
+where dno=(select dno
+	    from department
+	    where dname='RESEARCH';)
+	
+--문제15.평균 급여보다 많은 급여를 받고 이름에 M이 포함된 사원과 같은 부서에서 근무하는 사원이름, 사원번호, 급여 표시
+
+--궁금했던것
+--'평균급여보다 많은 급여를 받고 이름에 M이 포함된 사원' 과 같은 부서에서 근무하는 사원을 구해야하는가? --내가푼방법 --다른사람 안나옴. 나만 데이터 변경해서
+--이름에 M이 포함된 사원과 같은부서에서 근무하는 사원 중에서 평균급여보다 많은 급여를 받는사람을 구해야하는가? --선생님풀이
+
+--[1]평균급여 구하기
+select round(avg(salary),0)
+from employee;--소수점 제거
+
+--내가 푼 방법
+--[2]평균급여보다 많고 이름에 M이 포함된 사원의 부서번호 구하기
+select dno
+from employee
+where ename like '%M%'
+and salary > (select round(avg(salary),0)
+	     from employee);
+--★이름에 M이 포함되고 급여가 평균급여가 많은 사람은 데이터베이스상 10,20번부서에 있다.
+
+--[3]같은 부서에서 근무하는 사원 이름,번호,급여 표시
+select ename, eno, salary
+from employee
+where dno in (select dno
+	      from employee
+	      where ename like '%M%'
+	      and salary > (select round(avg(salary),0)
+		           from employee));
+order by 1;
+--★이 결과의 문제는 '평균급여보다 많은 급여를 받고 이름이M이 포함된 사원' 과 같은 부서에서 근무하는 사원이름, 번호, 급여표시
+--★기존 데이터를 제맘대로 바꾼것 때문에 다른분들은 이 실행문이 안나옴 평균급여보다 높고 이름에 M이 포함된 사원이 없기때문
+
+--선생님 방법
+--[2]이름에 M이 포함된 사원의 부서번호 구하기
+select dno
+from employee 
+where ename like '%M%'
+
+--★근데 이방법을 사용하면 30번부서도 나온다.
+--[3]같은 부서에서 근무하는 사원 이름,번호,급여 표시
+select dno, ename, eno, salary
+from employee
+where salary > (select round(avg(salary),0)
+				from employee)
+				and dno in (select dno
+					   from employee 
+					   where ename like '%M%');	 
+--★이 결과의 문제는 이름에 M이 포함된 사원과 같은 부서에서 근무하는 사원중 평균급여보다 많은 급여를 받는 사원이름, 사원번호, 급여표시
+
+--문제16.평균급여가 가장 적은 업무와 그 평균급여 표시
+--[1]업무별 가장적은 평균급여
+select min(avg(salary))
+from employee
+group by job;--여기서 select에 job을 추가하면 5:1로 매칭안됨
+
+--[2]가장 적은 업무와 평균급여
+select job, round(avg(salary),0)
+from employee
+group by job
+having avg(salary)=(select min(avg(salary))
+		from employee
+		group by job);
+
+--문제17.담당업무가 MANAGER인 사원이 소속된 부서와 동일한 부서의 사원이름 표시
+--문제가 이상한거같음. 업무가 manager인 사원은 모든부서에 있음
+--[1]업무가 MANAGER인 사원이 소속된 부서
+select dno
+from employee
+where job='MANAGER';
+
+--[2]서브쿼리 결합
+select ename
+from employee
+where dno in (select dno
+	      from employee
+	      where job='MANAGER');

@@ -1,0 +1,47 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>쇼핑몰관리 프로그램</title>
+</head>
+<body>
+	<%@ include file = "header.jsp" %><!-- header.jsp안에 dbconn.jsp(DB연결) -->
+	<section>
+		<div>
+			<h2>회원조회</h2>
+		</div>
+		<table style = "margin : 0 auto" border = "1" width = "1000">
+			<tr>
+				<th>회원번호</th>
+				<th>이름</th>
+				<th>주소</th>
+				<th>가입일</th>
+				<th>성별</th>
+				<th>전화번호</th>
+			</tr>
+			<%
+			sql = "select memno, name, address, to_char(hiredate, 'yyyy.mm.dd') as hiredate, decode(gender, 'M', '남', 'F', '여') as gender, (tel1||'-'||tel2||'-'||tel3) as tel from member";
+			rs = stmt.executeQuery(sql);
+				while(rs.next()) {
+					String gender = rs.getString("gender");
+					String hiredate = rs.getString("hiredate");
+					String tel = rs.getString("tel");
+			%>
+			<tr>
+				<td class = "value"><a href = "update.jsp"><%=rs.getString("memno")%></a></td>
+				<td class = "value"><%=rs.getString("name")%></td>
+				<td class = "value"><%=rs.getString("address")%></td>
+				<td class = "value"><%=hiredate%></td>
+				<td class = "value"><%=gender%></td>
+				<td class = "value"><%=tel%></td>
+			</tr>
+			<%
+				}
+			%>
+		</table>
+	</section>
+	<%@ include file = "footer.jsp" %><!-- DB연결 해제 -->
+</body>
+</html>

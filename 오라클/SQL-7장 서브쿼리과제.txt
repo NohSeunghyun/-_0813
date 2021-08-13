@@ -1,0 +1,24 @@
+--방법1.equi 조인
+select e.dno, e.eno, e.ename, e.salary
+from employee e, (select dno, min(salary) as min_sal
+		from employee
+		group by dno) s
+where e.dno = s.dno
+and e.salary = s.min_sal
+order by 1;
+
+--방법2.natural 조인
+select dno, eno, ename, salary
+from employee natural join (select dno, min(salary) as minsalary 
+			from employee
+		  	group by dno)
+where salary=minsalary
+order by 1;
+
+--방법3.기존 안나오던 실행문에 검색조건 한개더추가
+select dno, eno, ename, salary
+from employee
+where (dno, salary) in (select dno, min(salary)
+		    from employee
+		    group by dno)
+order by 1;

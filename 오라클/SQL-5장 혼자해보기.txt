@@ -1,0 +1,73 @@
+/********************************
+ ***5장-그룹함수혼자해보기 ***
+ ********************************/
+
+--1. 모든 사원의 급여 최고액, 최저액, 총액 및 평균 급여를 출력하시오.
+--컬럼의 별칭은 결과 화면과 동일하게 지정하고 평균에 대해서는 정수로 반올림하시오.
+
+select max(salary) as "급여 최고액", 
+min(salary) as "급여 최저액", 
+sum(salary) as "급여 총액", 
+round(avg(salary)) as "평균 급여"
+from employee;
+
+--2.각 담당 업무 유형별로 급여 최고액, 최저액, 총액 및 평균급여를 출력하시오.
+--컬럼의 별칭은 결과 화면과 동일하게 지정하고 평균에 대해서는 정수로 반올림하시오.
+
+select job,
+max(salary) as "급여 최고액", 
+min(salary) as "급여 최저액", 
+sum(salary) as "급여 총액", 
+round(avg(salary)) as "평균 급여"
+from employee
+group by job;
+
+--3. count(*)함수를 이용하여 담당업무가 동일한 사원 수를 출력하시오.
+
+select job, count(*) as "업무가 같은 사원수"
+from employee
+group by job;
+
+--4.관리자 수를 나열하시오
+--컬럼의 별칭은 화면과 동일하게 지정하시오.
+
+--1)
+select count(*) as "관리자의 수"
+from employee
+where job='MANAGER';
+
+--2)
+select job, count(*) as "관리자의 수"
+from employee
+where job='MANAGER'
+group by job;
+
+--5.급여 최고액, 급여 최저액의 차액을 출력하시오.
+--컬럼의 별칭은 화면과 동일하게 지정하시오.
+
+select max(salary) as "급여 최고액",
+min(salary) as "급여 최저액",
+max(salary)-min(salary) as "차액"
+from employee;
+
+--6.직급별 사원의 최저 급여를 출력하시오.
+--관리자를 알수 없는 사원 및 최저 급여가 2000미만인 그룹은 제외시키고
+--결과를 급여에 대한 내림차순으로 정렬하여 출력하시오.
+
+--1)
+select job, min(salary) as "최저 급여"
+from employee
+where manager is not null
+group by job
+having min(salary)>=2000
+order by 2 desc;
+
+--2)
+select job, min(salary) as "최저 급여"
+from employee
+where manager is not null
+group by job
+having not min(salary)<2000
+order by 2 desc;
+
+/************************************************************************************************************************************/

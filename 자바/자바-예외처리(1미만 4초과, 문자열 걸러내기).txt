@@ -1,0 +1,47 @@
+package array_phone;
+
+public class PhoneBookMain {
+
+	public static void main(String[] args) {
+		
+		System.out.print("저장할 친구수를 입력하세요. : ");
+		int num = MenuViewer.sc.nextInt();
+		PhoneBookManager manager = new PhoneBookManager(num);
+		boolean status = true;
+		do {
+			MenuViewer.showMenu();
+				int choice = 0;
+				MenuChoiceException.wrongChoice = MenuViewer.sc.nextInt(); // MenuChoiceException의 멤버변수 wrongChoice static으로 변경
+				choice = MenuChoiceException.wrongChoice;
+				if (choice < PhoneManager.input || choice > PhoneManager.exit) {
+					throw new MenuChoiceException();
+				} // 1미만 4초과 걸러내기
+				switch (choice) {
+				case PhoneManager.input : manager.inputData(); break;
+				case PhoneManager.search : manager.searchData(); break;
+				case PhoneManager.delete : manager.deleteData(); break;
+				case PhoneManager.exit : {
+					System.out.println("******프로그램종료******"); 
+					status = false;
+					}
+				}
+			} catch (PhoneSizeException e) {
+				System.out.println(e.getMessage());
+			} catch (MenuChoiceException e) {
+				System.out.println(e.getMessage());
+				e.showWrongChoice(); 
+			} catch (InputMismatchException e) { // 문자열 걸러내기
+				MenuViewer.sc.nextLine();
+				System.out.println("정수로 입력해주세요.");
+				System.out.println("메뉴 선택을 다시 시작합니다. \n");
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				System.out.println("====== 고객님 사랑합니다. ======");
+			}
+		} while (status);
+		
+	} // 메인문
+	
+} // 클래스문
+/*******************************************************************************************************/

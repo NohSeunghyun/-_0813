@@ -1,0 +1,38 @@
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class Project5_1 {
+
+	public static void main(String[] args) {// 미완성
+
+		Scanner sc = new Scanner(System.in);
+
+		// Project5 입력한 횟수만큼 자동으로 배열객체에 저장.=>무한루프(마음껏 값 입력)후 명령어(0) 입력시 연산.
+		
+		System.out.println("======Do While문 사용======");
+
+		int[] sco1 = null;
+
+		int num = 0;
+		int sum = 0;
+		double count=0;
+		int i = 1;
+		do {System.out.print((i)+"번째 값을 입력하세요. 0입력시 연산이 종료됩니다.\n=>");
+			sco1=new int [i];
+			sco1[num] = sc.nextInt();
+			if (sco1[num]==0)break;
+			sum += sco1[num];
+			num++;
+			count++;
+			i++;
+		} while (true); // Do While문 종료
+		System.out.println(Arrays.toString(sco1));//반복문에서 length값이 count에의해 참조되면서 증가, 
+						//기존에있던 length값을 덮어씌우면서 기존에있던 값들이 계속사라짐.0만나옴;;
+						//배열객체에 저장안됨;
+		System.out.println("합=" + sum);
+		System.out.println("평균=" + sum/count);
+
+	}// 메인문
+
+}// 클래스문
+/*******************************************************************************************************/

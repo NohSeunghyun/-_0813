@@ -1,0 +1,83 @@
+--★★문제7. 부하직원이 없는 사람 이름 표시 -자기 사원번호가 매니저컬럼에 들어가있지 않는사람.
+
+--방법1.서브쿼리
+
+--방법1-1.서브쿼리 활용(in연산자)
+--서브쿼리 결과중 어느것도 아니다 라고 배운 3가지 
+-- => not in, <> any, != any인데 any연산자 2개는 not in과다른 값(모든사원의 값)이 나온다;; 이유? 모름
+--[1]상관사원번호 출력
+select distinct nvl(manager,0)
+from employee;
+
+--상관사원번호(manager컬럼)에 자신의 사원번호(eno)가 없으면 부하직원이 없는 사원이 됨.
+--[2]서브쿼리로 결합
+select ename
+from employee
+where eno not in (select nvl(manager,0) --null값이 있으면 값이 안나오기때문에 0으로 바꿈.
+		from employee);
+
+--방법1-2.서브쿼리 활용(in연산자) 위 방법과 같으나 nvl함수를 안쓰는것.
+--[1]상관사원번호 출력 (null값 제외)
+select distinct manager
+from employee
+where manager is not null;
+
+--상관사원번호(manager컬럼)에 자신의 사원번호(eno)가 없으면 부하직원이 없는 사원이 됨.
+--[2]서브쿼리로 결합
+select ename
+from employee
+where eno not in (select manager
+		from employee
+		where manager is not null);
+				  
+--위 결과들을 검증
+select ename
+from employee
+where eno not in (7839, 7782, 7698, 7902, 7566, 7788); --null 이 있으면 값이 안나옴. 8번문제와 차이점?? 모름
+
+--★★문제8. 부하직원이 있는 사람 이름 표시 -자기 사원번호가 매니저컬럼에 들어가 있는 사람.
+
+--방법1. self 조인
+
+--방법1-1.equi join 활용
+select distinct m.ename
+from employee e, employee m
+where e.manager = m.eno;
+
+--방법1-2.join on 활용
+select distinct m.ename
+from employee e join employee m
+on e.manager = m.eno;
+
+--방법2. 서브쿼리
+
+--방법2-1.서브쿼리 활용(in연산자)
+--[1]상관사원번호 출력
+select distinct manager --distinct안써도 서브쿼리결합시 중복된것 안나옴
+from employee;
+
+--상관사원번호(manager컬럼)에 자신의 사원번호(eno)가 있으면 부하직원이 있는 사원이 됨.
+--[2]서브쿼리로 결합
+select ename
+from employee
+where eno in (select manager
+	      from employee);
+
+--방법2-2.서브쿼리 활용(any연산자)
+--[1]상관사원번호 출력
+select distinct manager
+from employee;
+
+--상관사원번호(manager컬럼)에 자신의 사원번호(eno)가 있으면 부하직원이 있는 사원이 됨.
+--[2]서브쿼리로 결합
+select ename
+from employee
+where eno = any (select manager
+		from employee);
+
+--서브쿼리 결과값 모두를 비교하는 all연산자를 쓰면( eno = all (서브쿼리)) 값이 안나온다.이유?? 모름
+
+--위 결과들을 검증
+select ename
+from employee
+where eno in (7839, 7782, 7698, 7902, 7566, 7788, null); --null이 있어도 값이나옴. 7번문제와 차이점?? 모름
